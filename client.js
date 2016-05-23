@@ -2,6 +2,33 @@ var socket = io('http://localhost:8080');
 var user;
 var peerList = {};
 
+
+function WebRTC(){
+	var self = this;
+	socket.on("createRoom", function(data){
+		self.onCreateRoom(data);
+	})
+
+	socket.on("joinRoom", function(data){
+		self.onJoinRoom(data);
+	})
+	
+	socket.on("login", function(data) {
+		if (data.status === "success"){
+			user = data.userName;
+			setLocal(user);
+		} else if (data.status === "fail"){
+			document.getElementById("feedback").value = "User " + data.userName + " already exists";
+		}
+		self.onLogin(data);
+	})
+
+}
+
+WebRTC.prototype.onCreateRoom = function(data){};
+WebRTC.prototype.onJoinRoom = function(data){};
+WebRTC.prototype.onLogin = function(data){};
+
 function send(e) {
 	if (e.keyCode == 13) {
 		var command = document.getElementById("command").value;
@@ -40,15 +67,6 @@ function joinRoom(e) {
 
 socket.on("feedback", function(data) {
 	document.getElementById("feedback").value = data;
-})
-
-socket.on("login", function(data) {
-	if (data.status === "success"){
-		user = data.userName;
-		setLocal(user);
-	} else if (data.status !== "fail"){
-		document.getElementById("feedback").value = "User " + data.userName + " already exists";
-	}
 })
 
 socket.on("newUser", function(data) {
@@ -93,19 +111,5 @@ socket.on("ICESetupStatus", function(data){
 	initConnection(data.remote);
 })
 
-socket.on("createRoom", function(data) {
-	if (data.status === "success"){
-		document.getElementById("feedback").value = "You successfully created Room " + data.room;
-	} else if (data.status === "fail"){
-		document.getElementById("feedback").value = "Room " + data.room + " already exists";
-	}
-})
 
-socket.on("joinRoom", function(data) {
-	if (data.status === "success"){
-		setLocal(user);
-	} else if (data.status === "fail"){
-		document.getElementById("feedback").value = "Room " + data.room + " does not exist";
-	}
-})
 
